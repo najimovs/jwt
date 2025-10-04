@@ -7,22 +7,7 @@ const users = {
 	rano: "r",
 }
 
-// const secret = "1234"
-
-// const payloadForBro = {
-// 	username: "bro",
-// 	isAdmin: true,
-// }
-
-// const token = jwt.sign( payloadForBro, secret, { expiresIn: 10 } )
-
-// console.log( "Imm.", jwt.verify( token, secret ) )
-
-// setTimeout( () => {
-
-// 	console.log( "Aft. 15 sec.", jwt.verify( token, secret ) )
-
-// }, 15_000 )
+const JWT_SECRET = "1234"
 
 const app = express()
 
@@ -62,12 +47,29 @@ app.post( "/login", ( req, res ) => {
 		return
 	}
 
-	res.send( { message: "OK" } )
+	const JWT_TOKEN = jwt.sign( {}, JWT_SECRET, { expiresIn: 60 } )
+
+	res.send( { message: "OK", accessToken: JWT_TOKEN } )
 } )
 
 app.get( "/secret-data", ( req, res ) => {
 
-	res.send( secretData )
+	const accessToken = req.headers.access_token
+
+	try {
+
+		jwt.verify( accessToken, JWT_SECRET )
+
+		res.send( secretData )
+
+		return
+	}
+	catch( err ) {
+
+		console.log( err )
+	}
+
+	res.send( {} )
 } )
 
 app.listen( 3_000, () => console.info( ":3000" ) )
